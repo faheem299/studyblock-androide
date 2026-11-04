@@ -106,7 +106,7 @@ class _TimerViewState extends ConsumerState<TimerView> {
           ),
         ],
         const SizedBox(height: 20),
-        Text('NO DAYS OFF.\nOWN THE HOUR.', style: display(52, spacing: 0)),
+        Text('OWN THE HOUR.', style: display(52, spacing: 0)),
         const SizedBox(height: 20),
         MinuteGrid(tracker: t),
         const SizedBox(height: 20),

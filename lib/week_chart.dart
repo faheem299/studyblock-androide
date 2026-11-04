@@ -114,9 +114,9 @@ import 'theme.dart';
 class WeekChart extends ConsumerWidget {
   const WeekChart({super.key});
 
-  static const double _barArea = 140; // max bar height
+  static const double _barArea = 150; // max bar height
   static const double _labelArea = 90; // room for the rotated duration label
-  static const double _barWidth = 25;
+  static const double _barWidth = 20;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
