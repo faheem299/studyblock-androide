@@ -52,7 +52,7 @@ class _TimerViewState extends ConsumerState<TimerView> {
     if (ok && mounted) ref.read(appProvider.notifier).reset(t);
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     ref.watch(tickProvider);
     final day = ref.watch(appProvider).day(t);
@@ -70,69 +70,76 @@ class _TimerViewState extends ConsumerState<TimerView> {
     _checkGoal(cur, now);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(running ? '● LIVE' : 'PAUSED',
-            style: mono(12, color: running ? color : C.muted, weight: FontWeight.bold)),
+        Text('SESSION ${day.sessions.length} · ${running ? 'LIVE' : 'PAUSED'}',
+            style: syne(11, color: running ? color : C.muted)
+                .copyWith(letterSpacing: 3)),
         const SizedBox(height: 8),
-        Text(fmt(sessMs), style: mono(52, weight: FontWeight.bold)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(fmt(sessMs), style: display(112)),
+        ),
         const SizedBox(height: 16),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: (sessMs / sessGoalMs).clamp(0.0, 1.0),
-            minHeight: 14,
-            backgroundColor: C.border,
-            color: color,
+        Container(
+          height: 20,
+          color: C.border,
+          alignment: Alignment.centerLeft,
+          child: FractionallySizedBox(
+            widthFactor: (sessMs / sessGoalMs).clamp(0.0, 1.0),
+            child: Container(color: color),
           ),
         ),
         const SizedBox(height: 8),
         Text('$pct% of $sessGoal h session goal', style: mono(12, color: C.muted)),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text('Today ${fmt(total)}', style: mono(11, color: C.muted)),
         if (cur?.goalMet(now) ?? false) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: C.surface,
-              border: Border.all(color: color),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text('🎉 Session goal reached!',
-                textAlign: TextAlign.center,
-                style: syne(14, color: color, weight: FontWeight.w800)),
+            decoration: BoxDecoration(border: Border.all(color: color, width: 2)),
+            child: Text('SESSION GOAL REACHED. KEEP GOING.',
+                textAlign: TextAlign.center, style: syne(14, color: color)),
           ),
         ],
         const SizedBox(height: 20),
+        Text('NO DAYS OFF.\nOWN THE HOUR.', style: display(52, spacing: 0)),
+        const SizedBox(height: 20),
+        MinuteGrid(tracker: t),
+        const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
-          child: FilledButton.icon(
+          height: 60,
+          child: FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: color,
+              backgroundColor: C.text,
               foregroundColor: C.bg,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: const RoundedRectangleBorder(),
             ),
             onPressed: () => ref.read(appProvider.notifier).togglePause(t),
-            icon: Icon(running ? Icons.pause : Icons.play_arrow),
-            label: Text(running ? 'Pause' : 'Resume',
-                style: syne(15, color: C.bg, weight: FontWeight.w800)),
+            child: Text(running ? 'PAUSE' : 'RESUME',
+                style: syne(18, color: C.bg, weight: FontWeight.w800)
+                    .copyWith(letterSpacing: 3)),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Row(children: [
           Expanded(
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: color,
-                side: BorderSide(color: color),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: SizedBox(
+              height: 48,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: color,
+                  side: BorderSide(color: color, width: 2),
+                  shape: const RoundedRectangleBorder(),
+                ),
+                onPressed: () => _newSession(sessGoal),
+                child: Text('+ NEW SESSION',
+                    style: syne(13, color: color, weight: FontWeight.w800)),
               ),
-              onPressed: () => _newSession(sessGoal),
-              child: Text('+ New Session',
-                  style: syne(13, color: color, weight: FontWeight.w800)),
             ),
           ),
           const SizedBox(width: 8),
@@ -144,11 +151,9 @@ class _TimerViewState extends ConsumerState<TimerView> {
         ]),
         TextButton(
           onPressed: _adjust,
-          child: Text('± adjust minutes', style: mono(12, color: C.muted)),
+          child: Text('± ADJUST MINUTES', style: syne(11, color: C.muted)),
         ),
         const SizedBox(height: 16),
-        MinuteGrid(tracker: t),
-        const SizedBox(height: 24),
         SessionsList(tracker: t),
       ],
     );

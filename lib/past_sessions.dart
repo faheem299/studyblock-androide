@@ -37,7 +37,7 @@ class PastSessions extends ConsumerWidget {
           decoration: BoxDecoration(
             color: C.surface,
             border: Border.all(color: C.border),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.zero,
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(DateFormat('EEE, MMM d').format(parseDayKey(r.date)),
@@ -66,7 +66,7 @@ class PastSessions extends ConsumerWidget {
         ]),
         const SizedBox(height: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.zero,
           child: LinearProgressIndicator(
             value: frac,
             minHeight: 10,

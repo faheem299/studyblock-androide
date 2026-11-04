@@ -18,7 +18,7 @@ class SummaryCard extends ConsumerWidget {
       final color = trackerColor(t);
       return Expanded(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(t == Tracker.study ? '📘 Study' : '🌱 Skill',
+          Text(t == Tracker.study ? 'STUDY' : 'SKILL',
               style: syne(12, color: color, weight: FontWeight.w800)),
           const SizedBox(height: 6),
           Text(fmt(d.totalMs(now)), style: mono(18, weight: FontWeight.bold)),
@@ -38,7 +38,7 @@ class SummaryCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: C.surface,
         border: Border.all(color: C.border),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.zero,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('TODAY', style: mono(11, color: C.muted, weight: FontWeight.bold)),

@@ -58,14 +58,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [
-                    Text('StudyBlock', style: syne(22, weight: FontWeight.w800)),
+                    Row(children: [
+                    Text('STUDYBLOCK',
+                        style: syne(17, weight: FontWeight.w800).copyWith(letterSpacing: 3)),
                     const Spacer(),
-                    Text('🔥 ${s.streak(Tracker.study, now)}',
-                        style: mono(14, color: C.blue, weight: FontWeight.bold)),
+                    Text('STUDY ${s.streak(Tracker.study, now)}',
+                        style: syne(12, color: C.lime)),
                     const SizedBox(width: 14),
-                    Text('🌱 ${s.streak(Tracker.skill, now)}',
-                        style: mono(14, color: C.green, weight: FontWeight.bold)),
+                    Text('SKILL ${s.streak(Tracker.skill, now)}',
+                        style: syne(12, color: C.cyan)),
                   ]),
                   const SizedBox(height: 16),
                   Row(children: [
@@ -105,15 +106,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
     return GestureDetector(
       onTap: () => setState(() => tracker = t),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        height: 44,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: sel ? C.surface : Colors.transparent,
-          border: Border.all(color: sel ? trackerColor(t) : C.border),
-          borderRadius: BorderRadius.circular(12),
+          color: sel ? trackerColor(t) : Colors.transparent,
+          border: sel ? null : Border.all(color: C.line, width: 2),
         ),
         child: Text(trackerLabel(t),
-            style: syne(13, color: sel ? trackerColor(t) : C.muted, weight: FontWeight.bold)),
+            style: syne(13, color: sel ? C.bg : C.muted, weight: FontWeight.w800)),
       ),
     );
   }

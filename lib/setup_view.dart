@@ -20,7 +20,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Session goal', style: syne(20, weight: FontWeight.w800)),
+        Text('SESSION GOAL', style: syne(20, weight: FontWeight.w800)),
         const SizedBox(height: 4),
         Text('How many hours for this session?', style: mono(12, color: C.muted)),
         const SizedBox(height: 20),
@@ -38,7 +38,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
                   decoration: BoxDecoration(
                     color: goal == h ? color : C.surface,
                     border: Border.all(color: goal == h ? color : C.border),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.zero,
                   ),
                   child: Text('${h}h',
                       style: mono(15,
@@ -55,7 +55,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
               backgroundColor: color,
               foregroundColor: C.bg,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
             ),
             onPressed: () => ref.read(appProvider.notifier).start(widget.tracker, goal),
             child: Text('Start', style: syne(16, color: C.bg, weight: FontWeight.w800)),

@@ -54,7 +54,7 @@ class MinuteGrid extends ConsumerWidget {
       height: 10,
       decoration: BoxDecoration(
         color: idx < elapsedMin ? color : C.border,
-        borderRadius: BorderRadius.circular(1.5),
+        borderRadius: BorderRadius.zero,
       ),
     );
   }
@@ -86,7 +86,7 @@ class _PulseCellState extends State<_PulseCell> with SingleTickerProviderStateMi
           height: 10,
           decoration: BoxDecoration(
             color: widget.color,
-            borderRadius: BorderRadius.circular(1.5),
+            borderRadius: BorderRadius.zero,
           ),
         ),
       );

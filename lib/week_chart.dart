@@ -39,12 +39,12 @@
 //             toY: st,
 //             width: 9,
 //             color: barColor(Tracker.study, r),
-//             borderRadius: BorderRadius.circular(2)),
+//             borderRadius: BorderRadius.zero),
 //         BarChartRodData(
 //             toY: sk,
 //             width: 9,
 //             color: barColor(Tracker.skill, r),
-//             borderRadius: BorderRadius.circular(2)),
+//             borderRadius: BorderRadius.zero),
 //       ]));
 //     }
 
@@ -54,7 +54,7 @@
 //       decoration: BoxDecoration(
 //         color: C.surface,
 //         border: Border.all(color: C.border),
-//         borderRadius: BorderRadius.circular(14),
+//         borderRadius: BorderRadius.zero,
 //       ),
 //       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 //         Row(children: [
@@ -156,7 +156,7 @@ class WeekChart extends ConsumerWidget {
             height: h,
             decoration: BoxDecoration(
               color: ms == 0 ? C.border : color,
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.zero,
             ),
           ),
         ],
@@ -192,7 +192,7 @@ class WeekChart extends ConsumerWidget {
       decoration: BoxDecoration(
         color: C.surface,
         border: Border.all(color: C.border),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.zero,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [

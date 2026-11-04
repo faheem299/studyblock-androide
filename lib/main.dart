@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_notifier.dart';
-import 'home_screen.dart';
+import 'splash_screen.dart';   // replaces: import 'home_screen.dart';
 import 'theme.dart';
 
 
@@ -14,7 +14,7 @@ Future<void> main() async {
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     ),
   ));
 }

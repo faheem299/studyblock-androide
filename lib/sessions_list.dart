@@ -31,7 +31,7 @@ class SessionsList extends ConsumerWidget {
             decoration: BoxDecoration(
               color: C.surface,
               border: Border.all(color: s.id == curId ? color : C.border),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.zero,
             ),
             child: Row(children: [
               Text(fmtTime.format(s.startedAt), style: mono(12, color: C.muted)),

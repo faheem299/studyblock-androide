@@ -24,7 +24,7 @@ Future<int?> showGoalDialog(BuildContext context, Tracker tracker, int initial) 
                 decoration: BoxDecoration(
                   color: goal == h ? color : C.bg,
                   border: Border.all(color: goal == h ? color : C.border),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.zero,
                 ),
                 child: Text('$h',
                     style: mono(14,
