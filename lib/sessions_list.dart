@@ -36,7 +36,8 @@ class SessionsList extends ConsumerWidget {
             child: Row(children: [
               Text(fmtTime.format(s.startedAt), style: mono(12, color: C.muted)),
               const SizedBox(width: 10),
-              Text('${s.goalHours}h', style: mono(11, color: C.muted)),
+              Text('${s.goalHours} h goal${s.goalMet(now) ? ' ✓' : ''}',
+                  style: mono(11, color: s.goalMet(now) ? color : C.muted)),
               const Spacer(),
               if (s.id == curId) ...[
                 Text(s.isRunning ? '● LIVE' : 'PAUSED',

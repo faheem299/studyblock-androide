@@ -19,16 +19,18 @@ class _TimerViewState extends ConsumerState<TimerView> {
 
   Tracker get t => widget.tracker;
 
-  void _checkGoal(TrackerDay day, DateTime now) {
-    if (_announcing || day.goalAnnounced || !day.goalMet(now)) return;
+  void _checkGoal(Session? cur, DateTime now) {
+    if (cur == null || _announcing || cur.announced || !cur.goalMet(now)) return;
     _announcing = true;
+    final id = cur.id;
+    final goal = cur.goalHours;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(appProvider.notifier).markGoalAnnounced(t);
+      ref.read(appProvider.notifier).markGoalAnnounced(t, id);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         behavior: SnackBarBehavior.floating,
         backgroundColor: trackerColor(t),
-        content: Text('🎉 ${day.goalHours}h goal reached! Keep going if you like.',
+        content: Text('🎉 $goal h session goal reached!',
             style: mono(12, color: C.bg, weight: FontWeight.bold)),
       ));
       _announcing = false;
@@ -50,23 +52,22 @@ class _TimerViewState extends ConsumerState<TimerView> {
     if (ok && mounted) ref.read(appProvider.notifier).reset(t);
   }
 
-    @override
+   @override
   Widget build(BuildContext context) {
     ref.watch(tickProvider);
     final day = ref.watch(appProvider).day(t);
     final now = DateTime.now();
-    final dayGoal = day.goalHours ?? 1;
     final total = day.totalMs(now);
     final cur = day.current;
     final running = cur?.isRunning ?? false;
     final color = trackerColor(t);
 
-    final sessGoal = cur?.goalHours ?? dayGoal;
+    final sessGoal = cur?.goalHours ?? 1;
     final sessMs = cur?.elapsedMs(now) ?? 0;
     final sessGoalMs = sessGoal * msPerHour;
     final pct = sessMs * 100 ~/ sessGoalMs;
 
-    _checkGoal(day, now);
+    _checkGoal(cur, now);
 
     return Column(
       children: [
@@ -76,7 +77,7 @@ class _TimerViewState extends ConsumerState<TimerView> {
         Text(fmt(sessMs), style: mono(52, weight: FontWeight.bold)),
         const SizedBox(height: 16),
         ClipRRect(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           child: LinearProgressIndicator(
             value: (sessMs / sessGoalMs).clamp(0.0, 1.0),
             minHeight: 14,
@@ -85,10 +86,10 @@ class _TimerViewState extends ConsumerState<TimerView> {
           ),
         ),
         const SizedBox(height: 8),
-        Text('$pct% of ${sessGoal}h session goal', style: mono(12, color: C.muted)),
+        Text('$pct% of $sessGoal h session goal', style: mono(12, color: C.muted)),
         const SizedBox(height: 4),
-        Text('Today ${fmt(total)} / ${dayGoal}h', style: mono(11, color: C.muted)),
-        if (day.goalMet(now)) ...[
+        Text('Today ${fmt(total)}', style: mono(11, color: C.muted)),
+        if (cur?.goalMet(now) ?? false) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -98,7 +99,7 @@ class _TimerViewState extends ConsumerState<TimerView> {
               border: Border.all(color: color),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text('🎉 Daily goal reached! You can keep going.',
+            child: Text('🎉 Session goal reached!',
                 textAlign: TextAlign.center,
                 style: syne(14, color: color, weight: FontWeight.w800)),
           ),

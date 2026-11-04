@@ -20,9 +20,9 @@ class _SetupViewState extends ConsumerState<SetupView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Daily goal', style: syne(20, weight: FontWeight.w800)),
+        Text('Session goal', style: syne(20, weight: FontWeight.w800)),
         const SizedBox(height: 4),
-        Text('How many hours today?', style: mono(12, color: C.muted)),
+        Text('How many hours for this session?', style: mono(12, color: C.muted)),
         const SizedBox(height: 20),
         Wrap(
           spacing: 10,

@@ -51,23 +51,22 @@ class PastSessions extends ConsumerWidget {
 
   Widget _row(DayRecord r, Tracker t) {
     final color = trackerColor(t);
-    final goalMs = r.goal(t) * msPerHour;
-    final frac = goalMs == 0 ? 0.0 : (r.ms(t) / goalMs).clamp(0.0, 1.0);
+    final n = r.sessions(t);
+    final frac = n == 0 ? 0.0 : r.reached(t) / n;
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Text(t == Tracker.study ? '📘' : '🌱', style: const TextStyle(fontSize: 12)),
           const SizedBox(width: 6),
-          Text('${fmtHm(r.ms(t))} / ${r.goal(t)} h',
-              style: mono(11, color: r.met(t) ? color : C.text)),
+          Text(fmtHm(r.ms(t)), style: mono(11, color: r.met(t) ? color : C.text)),
           const Spacer(),
-          Text('${r.sessions(t)} session${r.sessions(t) == 1 ? '' : 's'}',
+          Text('${r.reached(t)}/$n goals · $n session${n == 1 ? '' : 's'}',
               style: mono(10, color: C.muted)),
         ]),
         const SizedBox(height: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(5),
           child: LinearProgressIndicator(
             value: frac,
             minHeight: 10,

@@ -78,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObse
                                     Expanded(
                     child: SingleChildScrollView(
                       child: Column(children: [
-                        day.goalHours == null
+                        day.sessions.isEmpty
                             ? SetupView(key: ValueKey('setup$tracker'), tracker: tracker)
                             : TimerView(key: ValueKey('timer$tracker'), tracker: tracker),
                         const SizedBox(height: 24),

@@ -40,7 +40,7 @@ class AppNotifier extends Notifier<AppData> {
     if (day.sessions.isEmpty) return h;
     final i = h.indexWhere((r) => r.date == date);
     final base = i >= 0 ? h[i] : DayRecord(date: date);
-    final upd = base.add(t, day.totalMs(at), day.goalHours ?? 0, day.sessions.length);
+    final upd = base.add(t, day.totalMs(at), day.sessions.length, day.reachedCount(at));
     final out = [...h];
     i >= 0 ? out[i] = upd : out.add(upd);
     out.sort((a, b) => a.date.compareTo(b.date));
@@ -74,10 +74,8 @@ class AppNotifier extends Notifier<AppData> {
 
   void start(Tracker t, int goalHours) {
     final now = DateTime.now();
-    _update(t, (d) => d.copyWith(
-          goalHours: goalHours,
-          sessions: [...d.sessions, Session.begin(goalHours, now)],
-        ));
+    _update(t, (d) =>
+        d.copyWith(sessions: [...d.sessions, Session.begin(goalHours, now)]));
   }
 
   void newSession(Tracker t, int goalHours) {
@@ -107,8 +105,13 @@ class AppNotifier extends Notifier<AppData> {
     });
   }
 
-  void markGoalAnnounced(Tracker t) =>
-      _update(t, (d) => d.copyWith(goalAnnounced: true));
+  void markGoalAnnounced(Tracker t, String sessionId) => _update(
+        t,
+        (d) => d.copyWith(sessions: [
+          for (final s in d.sessions)
+            s.id == sessionId ? s.copyWith(announced: true) : s
+        ]),
+      );
 
   /// Archives today's data for this tracker, then returns it to setup.
   void reset(Tracker t) {

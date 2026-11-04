@@ -11,7 +11,7 @@ DayRecord recordFor(AppData s, DateTime day, DateTime now) {
     for (final t in Tracker.values) {
       final d = s.day(t);
       if (d.sessions.isNotEmpty) {
-        r = r.add(t, d.totalMs(now), d.goalHours ?? 0, d.sessions.length);
+        r = r.add(t, d.totalMs(now), d.sessions.length, d.reachedCount(now));
       }
     }
   }

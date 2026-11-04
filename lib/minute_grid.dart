@@ -14,7 +14,7 @@ class MinuteGrid extends ConsumerWidget {
     final day = ref.watch(appProvider).day(tracker);
     final now = DateTime.now();
     final cur = day.current;
-    final goal = cur?.goalHours ?? day.goalHours ?? 1;
+    final goal = cur?.goalHours ?? 1;
     final elapsedMin = (cur?.elapsedMs(now) ?? 0) ~/ 60000;
     final running = cur?.isRunning ?? false;
     final color = trackerColor(tracker);

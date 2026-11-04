@@ -25,6 +25,7 @@ class Session {
   final int accumulatedMs;
   final DateTime? runningSince; // null = paused
   final bool ended;
+  final bool announced; // goal-reached toast already shown
 
   const Session({
     required this.id,
@@ -33,6 +34,7 @@ class Session {
     this.accumulatedMs = 0,
     this.runningSince,
     this.ended = false,
+    this.announced = false,
   });
 
   factory Session.begin(int goalHours, DateTime now) => Session(
@@ -43,16 +45,20 @@ class Session {
       );
 
   bool get isRunning => runningSince != null;
+  int get goalMs => goalHours * msPerHour;
 
   int elapsedMs(DateTime now) =>
       accumulatedMs +
       (runningSince == null ? 0 : max(0, now.difference(runningSince!).inMilliseconds));
+
+  bool goalMet(DateTime now) => elapsedMs(now) >= goalMs;
 
   Session copyWith({
     int? accumulatedMs,
     DateTime? runningSince,
     bool clearRunning = false,
     bool? ended,
+    bool? announced,
   }) =>
       Session(
         id: id,
@@ -61,6 +67,7 @@ class Session {
         accumulatedMs: accumulatedMs ?? this.accumulatedMs,
         runningSince: clearRunning ? null : (runningSince ?? this.runningSince),
         ended: ended ?? this.ended,
+        announced: announced ?? this.announced,
       );
 
   Session paused(DateTime now) =>
@@ -70,9 +77,10 @@ class Session {
 
   Session adjusted(int deltaMs, DateTime now) {
     final e = max(0, elapsedMs(now) + deltaMs);
-    return isRunning
+    final base = isRunning
         ? copyWith(accumulatedMs: e, runningSince: now)
         : copyWith(accumulatedMs: e);
+    return e >= goalMs ? base : base.copyWith(announced: false);
   }
 
   Map<String, dynamic> toJson() => {
@@ -82,6 +90,7 @@ class Session {
         'accumulatedMs': accumulatedMs,
         'runningSince': runningSince?.toIso8601String(),
         'ended': ended,
+        'announced': announced,
       };
 
   factory Session.fromJson(Map<String, dynamic> j) => Session(
@@ -92,102 +101,94 @@ class Session {
         runningSince:
             j['runningSince'] == null ? null : DateTime.parse(j['runningSince']),
         ended: j['ended'],
+        announced: j['announced'] ?? false,
       );
 }
 
 class TrackerDay {
-  final int? goalHours; // null = setup screen
-  final List<Session> sessions;
-  final bool goalAnnounced;
+  final List<Session> sessions; // empty = show setup screen
 
-  const TrackerDay({this.goalHours, this.sessions = const [], this.goalAnnounced = false});
+  const TrackerDay({this.sessions = const []});
 
   Session? get current =>
       sessions.isNotEmpty && !sessions.last.ended ? sessions.last : null;
 
   int totalMs(DateTime now) => sessions.fold(0, (a, s) => a + s.elapsedMs(now));
 
-  bool goalMet(DateTime now) =>
-      goalHours != null && totalMs(now) >= goalHours! * msPerHour;
+  int reachedCount(DateTime now) => sessions.where((s) => s.goalMet(now)).length;
 
-  TrackerDay copyWith({int? goalHours, List<Session>? sessions, bool? goalAnnounced}) =>
-      TrackerDay(
-        goalHours: goalHours ?? this.goalHours,
-        sessions: sessions ?? this.sessions,
-        goalAnnounced: goalAnnounced ?? this.goalAnnounced,
-      );
+  /// Today counts toward the streak once any session reached its goal.
+  bool streakOk(DateTime now) => sessions.any((s) => s.goalMet(now));
+
+  TrackerDay copyWith({List<Session>? sessions}) =>
+      TrackerDay(sessions: sessions ?? this.sessions);
 
   TrackerDay replaceCurrent(Session s) =>
       copyWith(sessions: [...sessions.sublist(0, sessions.length - 1), s]);
 
-  Map<String, dynamic> toJson() => {
-        'goalHours': goalHours,
-        'sessions': sessions.map((s) => s.toJson()).toList(),
-        'goalAnnounced': goalAnnounced,
-      };
+  Map<String, dynamic> toJson() =>
+      {'sessions': sessions.map((s) => s.toJson()).toList()};
 
   factory TrackerDay.fromJson(Map<String, dynamic> j) => TrackerDay(
-        goalHours: j['goalHours'],
-        sessions: (j['sessions'] as List).map((e) => Session.fromJson(e)).toList(),
-        goalAnnounced: j['goalAnnounced'],
+        sessions:
+            ((j['sessions'] ?? []) as List).map((e) => Session.fromJson(e)).toList(),
       );
 }
 
 class DayRecord {
   final String date;
-  final int studyMs, skillMs, studyGoal, skillGoal, studySessions, skillSessions;
+  final int studyMs, skillMs;
+  final int studySessions, skillSessions;
+  final int studyReached, skillReached; // sessions that reached their goal
 
   const DayRecord({
     required this.date,
     this.studyMs = 0,
     this.skillMs = 0,
-    this.studyGoal = 0,
-    this.skillGoal = 0,
     this.studySessions = 0,
     this.skillSessions = 0,
+    this.studyReached = 0,
+    this.skillReached = 0,
   });
 
   int ms(Tracker t) => t == Tracker.study ? studyMs : skillMs;
-  int goal(Tracker t) => t == Tracker.study ? studyGoal : skillGoal;
   int sessions(Tracker t) => t == Tracker.study ? studySessions : skillSessions;
-  bool met(Tracker t) => goal(t) > 0 && ms(t) >= goal(t) * msPerHour;
+  int reached(Tracker t) => t == Tracker.study ? studyReached : skillReached;
 
-  DayRecord add(Tracker t, int ms, int goal, int n) => t == Tracker.study
-      ? DayRecord(
-          date: date,
-          studyMs: studyMs + ms,
-          skillMs: skillMs,
-          studyGoal: max(studyGoal, goal),
-          skillGoal: skillGoal,
-          studySessions: studySessions + n,
-          skillSessions: skillSessions)
-      : DayRecord(
-          date: date,
-          studyMs: studyMs,
-          skillMs: skillMs + ms,
-          studyGoal: studyGoal,
-          skillGoal: max(skillGoal, goal),
-          studySessions: studySessions,
-          skillSessions: skillSessions + n);
+  /// Met = at least one session reached its goal.
+  bool met(Tracker t) => reached(t) > 0;
+
+  DayRecord add(Tracker t, int ms, int n, int reached) {
+    final st = t == Tracker.study;
+    return DayRecord(
+      date: date,
+      studyMs: studyMs + (st ? ms : 0),
+      skillMs: skillMs + (st ? 0 : ms),
+      studySessions: studySessions + (st ? n : 0),
+      skillSessions: skillSessions + (st ? 0 : n),
+      studyReached: studyReached + (st ? reached : 0),
+      skillReached: skillReached + (st ? 0 : reached),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'date': date,
         'studyMs': studyMs,
         'skillMs': skillMs,
-        'studyGoal': studyGoal,
-        'skillGoal': skillGoal,
         'studySessions': studySessions,
         'skillSessions': skillSessions,
+        'studyReached': studyReached,
+        'skillReached': skillReached,
       };
 
   factory DayRecord.fromJson(Map<String, dynamic> j) => DayRecord(
         date: j['date'],
-        studyMs: j['studyMs'],
-        skillMs: j['skillMs'],
-        studyGoal: j['studyGoal'],
-        skillGoal: j['skillGoal'],
-        studySessions: j['studySessions'],
-        skillSessions: j['skillSessions'],
+        studyMs: j['studyMs'] ?? 0,
+        skillMs: j['skillMs'] ?? 0,
+        studySessions: j['studySessions'] ?? 0,
+        skillSessions: j['skillSessions'] ?? 0,
+        studyReached: j['studyReached'] ?? 0,
+        skillReached: j['skillReached'] ?? 0,
       );
 }
 
@@ -222,9 +223,9 @@ class AppData {
       );
 
   /// Consecutive days meeting goal, derived from history (max 60 days kept).
-  int streak(Tracker t, DateTime now) {
+    int streak(Tracker t, DateTime now) {
     final byDate = {for (final r in history) r.date: r};
-    var count = day(t).goalMet(now) ? 1 : 0;
+    var count = day(t).streakOk(now) ? 1 : 0;
     var d = DateTime(now.year, now.month, now.day - 1);
     while (byDate[dayKey(d)]?.met(t) ?? false) {
       count++;

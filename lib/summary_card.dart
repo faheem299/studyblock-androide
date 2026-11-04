@@ -25,7 +25,7 @@ class SummaryCard extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             '${d.sessions.length} session${d.sessions.length == 1 ? '' : 's'}'
-            '${d.goalHours == null ? '' : ' · goal ${d.goalHours}h'}',
+            ' · ${d.reachedCount(now)} goal${d.reachedCount(now) == 1 ? '' : 's'} reached',
             style: mono(10, color: C.muted),
           ),
         ]),
